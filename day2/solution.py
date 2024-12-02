@@ -52,6 +52,8 @@ def is_safe_with_dampener_optimised(report: List[int]) -> bool:
     for k in range(n - 1):
         if not check(report[k], report[k + 1], monotony):
             errors.append(k)
+            if len(errors) > 2:
+                return False  # Short-circuit if too many errors
     number_of_errors = len(errors)
     if number_of_errors > 2:
         # If there are more than two errors, it cannot be fixed by only one removal
