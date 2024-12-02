@@ -30,6 +30,41 @@ def sign(x: int) -> int:
     return (x > 0) - (x < 0)
 
 
+def is_fixable(report: List[int], index, monotony) -> int:
+    """
+    Expects report[index] to be an error.
+    Will check for report[index+1] and edge cases.
+    If a fix is possible by removing a level,
+    the function returns the shift to the cursor that
+    can be applied.
+    A value of 0 means that it is not possible to fix
+    """
+    # If we are just before the last level of the report, it's
+    # always fixable
+    if index == len(report) - 2:
+        return 1
+    # Here we check for a second consecutive error
+    # In which case the only possible fix is to remove index + 1
+    if not check(report[index + 1], report[index + 2], monotony):
+        if check(report[index], report[index + 2], monotony):
+            return 2
+        return 0
+
+    # Now the last case is when the error is not followed by
+    # a second error.
+    # If the error is on the very first level, it's always fixable
+    if index == 0:
+        return 1
+    # If there is a single error, in the interior of the report,
+    # then we need to check if it's fixable at index or at index + 1
+    if check(report[index - 1], report[index + 1], monotony) or check(
+        report[index], report[index + 2], monotony
+    ):
+        return 2
+    # If nothing worked
+    return 0
+
+
 def is_safe_with_dampener_optimised(report: List[int]) -> bool:
     n = len(report)
 
@@ -46,36 +81,16 @@ def is_safe_with_dampener_optimised(report: List[int]) -> bool:
     if monotony == 0:
         return False
 
-    # Create a list of error pairs of points
-    # Each int k will represent the pair (k, k+1)
-    errors = []
-    for k in range(n - 1):
+    error_already_found = False
+    k = 0
+    while k < n - 1:
         if not check(report[k], report[k + 1], monotony):
-            errors.append(k)
-            if len(errors) > 2:
-                return False  # Short-circuit if too many errors
-    number_of_errors = len(errors)
-    if number_of_errors > 2:
-        # If there are more than two errors, it cannot be fixed by only one removal
-        return False
-    if number_of_errors == 2:
-        k = errors[0]
-        # If the two errors are not next to each other, it cannot work
-        if k + 1 != errors[1]:
-            return False
-        # If the two errors are next to each other, the only possible fix is to remove k+1
-        if not check(report[k], report[k + 2], monotony):
-            return False
-    if number_of_errors == 1:
-        k = errors[0]
-        # If the error happens at the start or at the end of the list, it's always fixable
-        if k == n - 2 or k == 0:
-            return True
-        # If there is a single error, in the interior of the list, then we need to check if it's fixable  at k or at k+1
-        if not check(report[k - 1], report[k + 1], monotony) and not check(
-            report[k], report[k + 2], monotony
-        ):
-            return False
+            if error_already_found:
+                return False
+            error_already_found = True
+            k += is_fixable(report, k, monotony)
+        else:
+            k += 1
 
     return True
 
