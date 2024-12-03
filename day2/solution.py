@@ -84,13 +84,13 @@ def is_safe_with_dampener_optimised(report: List[int]) -> bool:
     error_already_found = False
     k = 0
     while k < n - 1:
-        if not check(report[k], report[k + 1], monotony):
-            if error_already_found:
-                return False
-            error_already_found = True
-            k += is_fixable(report, k, monotony)
-        else:
+        if check(report[k], report[k + 1], monotony):
             k += 1
+            continue
+        if error_already_found:
+            return False
+        error_already_found = True
+        k += is_fixable(report, k, monotony)
 
     return True
 
