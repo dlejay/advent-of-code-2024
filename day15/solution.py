@@ -1,6 +1,17 @@
 from itertools import product
+import os
+import time
 
 MOVES = {"^": (-1, 0), "<": (0, -1), ">": (0, 1), "v": (1, 0)}
+
+
+def print_robot(state: list[list[str]], position: tuple[int, int]) -> None:
+    i, j = position
+    state[i][j] = "\033[31m@\033[0m"
+    time.sleep(0.03)
+    os.system("clear")
+    print("\n".join(map("".join, state)))
+    state[i][j] = "."
 
 
 def GPS_sum(state: list[list[str]]) -> int:
@@ -45,6 +56,7 @@ def process_part1(content: str) -> int:
     state[position[0]][position[1]] = "."
     for i in range(len(moves)):
         position = move(state, position, moves[i])
+        print_robot(state, position)
     return GPS_sum(state)
 
 
@@ -140,17 +152,9 @@ def move_robot(
     if state[i + Δi][j + Δj] == ".":
         return (i + Δi, j + Δj)
     if can_move_block(state, (i + Δi, j + Δj), direction):
-        print("I can move that block!")
         move_block(state, (i + Δi, j + Δj), direction)
         return (i + Δi, j + Δj)
     return (i, j)
-
-
-def print_robot(state: list[list[str]], position: tuple[int, int]) -> None:
-    i, j = position
-    state[i][j] = "@"
-    print("\n".join(map("".join, state)))
-    state[i][j] = "."
 
 
 def process_part2(content: str) -> int:
@@ -168,7 +172,6 @@ def process_part2(content: str) -> int:
     print_robot(widened, position)
 
     for i in range(len(moves)):
-        print("Move", moves[i])
         position = move_robot(widened, position, moves[i])
         print_robot(widened, position)
     return second_GPS_sum(widened)
