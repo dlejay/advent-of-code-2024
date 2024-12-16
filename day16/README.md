@@ -29,11 +29,9 @@ To figure out the best place to sit, you start by grabbing a map (your puzzle in
     #.###.#.#.#.#.#
     #S..#.....#...#
     ###############
-    
 
 There are many paths through this maze, but taking any of the best paths would incur a score of only _`7036`_. This can be achieved by taking a total of `36` steps forward and turning 90 degrees a total of `7` times:
 
-    
     ###############
     #.......#....E#
     #.#.###.#.###^#
@@ -49,7 +47,6 @@ There are many paths through this maze, but taking any of the best paths would i
     #^###.#.#.#v#^#
     #S..#.....#>>^#
     ###############
-    
 
 Here's a second example:
 
@@ -70,7 +67,6 @@ Here's a second example:
     #.#.#.#########.#
     #S#.............#
     #################
-    
 
 In this maze, the best paths cost _`11048`_ points; following one such path would look like this:
 
@@ -91,7 +87,6 @@ In this maze, the best paths cost _`11048`_ points; following one such path woul
     #^#v#^#########.#
     #S#>>^..........#
     #################
-    
 
 Note that the path shown above includes one 90 degree turn as the very first move, rotating the Reindeer from facing East to facing North.
 
@@ -122,7 +117,6 @@ In the first example, there are _`45`_ tiles (marked `O`) that are part of at le
     #O###.#.#.#O#O#
     #O..#.....#OOO#
     ###############
-    
 
 In the second example, there are _`64`_ tiles that are part of at least one of the best paths:
 
@@ -143,6 +137,11 @@ In the second example, there are _`64`_ tiles that are part of at least one of t
     #O#O#O#########.#
     #O#OOO..........#
     #################
-    
 
 Analyze your map further. _How many tiles are part of at least one of the best paths through the maze?_
+
+## Notes
+
+For Part 2: a node is on an optimal path if and only if the sum of its distance
+from S and the sum of its distance to E equals the result of Part 1.
+So one forward search and one backward search.
