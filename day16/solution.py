@@ -1,4 +1,5 @@
 import heapq
+from itertools import product
 
 DIRECTIONS = {(0, 1), (1, 0), (0, -1), (-1, 0)}
 
@@ -24,18 +25,16 @@ def h(
 
 
 def lowest_score(maze: tuple[str]) -> int:
-    rows = len(maze)
-    cols = len(maze[0])
-    start = (rows - 2, 1)
-    goal = (1, cols - 2)
-    cost = {start: 0}
+    rows, cols = len(maze), len(maze[0])
+    start, goal = (rows - 2, 1), (1, cols - 2)
     direction = (0, 1)
+    cost = {start: 0}
 
     priority_queue = []
     heapq.heappush(priority_queue, (h(start, direction, goal), start, direction))
 
     while priority_queue:
-        value, current, direction = heapq.heappop(priority_queue)
+        _, current, direction = heapq.heappop(priority_queue)
 
         if current == goal:
             return cost[current]
@@ -61,7 +60,81 @@ def lowest_score(maze: tuple[str]) -> int:
 
 
 def seats(maze: tuple[str]) -> int:
-    return 0
+    rows, cols = len(maze), len(maze[0])
+    start, goal = (rows - 2, 1), (1, cols - 2)
+    direction = (0, 1)
+    cost = {(start, direction): 0}
+
+    priority_queue = []
+    heapq.heappush(priority_queue, (h(start, direction, goal), start, direction))
+
+    # Explore costs
+    while priority_queue:
+        _, current, direction = heapq.heappop(priority_queue)
+        i, j = current
+        Δi, Δj = direction
+
+        # Compute neighbours
+        neighbours = [((i + Δi, j + Δj), direction, 1)]
+        for d in DIRECTIONS:
+            if d != direction:
+                neighbours.append((current, d, 1000))
+
+        # Process neighbours
+        for n in neighbours:
+            n_i, n_j = n[0]
+            if maze[n_i][n_j] == "#":
+                continue
+            tentative_cost = cost[(current, direction)] + n[2]
+
+            if (n[0], n[1]) not in cost or tentative_cost < cost[(n[0], n[1])]:
+                cost[(n[0], n[1])] = tentative_cost
+                heapq.heappush(
+                    priority_queue,
+                    (
+                        cost[(n[0], n[1])] + h(n[0], n[1], goal),
+                        n[0],
+                        n[1],
+                    ),
+                )
+    back = {(goal, (0, 1)): 0, (goal, (-1, 0)): 0}
+    pq = []
+    heapq.heappush(pq, (0, goal, (0, 1)))
+    heapq.heappush(pq, (0, goal, (-1, 0)))
+
+    while pq:
+        _, current, direction = heapq.heappop(pq)
+        i, j = current
+        Δi, Δj = direction
+
+        # Compute neighbours
+        neighbours = [((i - Δi, j - Δj), direction, 1)]
+        for d in DIRECTIONS:
+            if d != direction:
+                neighbours.append((current, d, 1000))
+
+        # Process neighbours
+        for n in neighbours:
+            n_i, n_j = n[0]
+            if maze[n_i][n_j] == "#":
+                continue
+            tentative_cost = back[(current, direction)] + n[2]
+            if (n[0], n[1]) not in back or tentative_cost < back[(n[0], n[1])]:
+                back[(n[0], n[1])] = tentative_cost
+                heapq.heappush(pq, (back[(n[0], n[1])], n[0], n[1]))
+    total = min(cost[(goal, (-1, 0))], cost[(goal, (0, 1))])
+    print(total)
+    seats = set()
+    for i, j in product(range(rows), range(cols)):
+        for d in DIRECTIONS:
+            if (
+                ((i, j), d) in cost
+                and ((i, j), d) in back
+                and cost[((i, j), d)] + back[((i, j), d)] == total
+            ):
+                seats.add((i, j))
+    print(seats)
+    return len(seats)
 
 
 def print_seats(maze: tuple[str], seats: set[tuple[int, int]]) -> None:
@@ -90,5 +163,5 @@ def process_part2(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    process_part1("test.txt")
-    process_part2("test.txt")
+    process_part1("input.txt")
+    process_part2("input.txt")
